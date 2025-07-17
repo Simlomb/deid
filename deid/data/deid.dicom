@@ -888,6 +888,13 @@ REMOVE ScheduledStudyLocationAETitle
 REMOVE OrderEntererLocation
 REMOVE AssignedLocation
 
+# This should work but it does not:
+# REMOVE ALL func:is_private
+# KEEP (1129,"Eigen, Inc",08)
+
+# This proves that private tags are recognized, but it is not clear how to keep only certain private tags:
+REMOVE (1129,"Eigen, Inc",08)
+
 ADD IssuerOfPatientID STARR
 ADD PatientBirthDate var:entity_timestamp
 ADD StudyDate var:item_timestamp

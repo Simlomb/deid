@@ -505,7 +505,8 @@ def parse_group_action(section, line, config, section_name):
 
     # We may have to deal with cases of spaces
     bot.debug("%s: adding %s" % (section, line))
-    parts = line.split(" ")
+    # Split the string by spaces, but only when the space is not inside quotes.
+    parts = re.findall(r'''(?:[^\s"']+|"(?:\\.|[^"])*"|'(?:\\.|[^'])*')+''', line)
     action = parts.pop(0).replace(" ", "")
 
     # Both require some parts
@@ -550,7 +551,7 @@ def parse_config_action(section, line, config, section_name=None):
         bot.exit("%s is not a valid action line." % line)
 
     # We may have to deal with cases of spaces
-    parts = line.split(" ")
+    parts = re.findall(r'''(?:[^\s"']+|"(?:\\.|[^"])*"|'(?:\\.|[^'])*')+''', line)
     action = parts.pop(0).replace(" ", "")
 
     # What field is the action for?
