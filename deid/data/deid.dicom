@@ -895,3 +895,4 @@ ADD PatientID var:entity_id
 ADD AccessionNumber var:item_id
 ADD PatientIdentityRemoved YES
 REMOVE jitter
+KEEP (0019,"GEMS_ACQU_01",0f)

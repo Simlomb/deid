@@ -202,7 +202,7 @@ class DicomParser:
         """
         self.add_field(field, value)
 
-    def parse(self, strip_sequences=False, remove_private=False):
+    def parse(self, strip_sequences=False, remove_private="remove"):
         """
         Parse the dicom.
 
@@ -216,10 +216,9 @@ class DicomParser:
         # Remove sequences first, maintained in DataStore
         if strip_sequences is True:
             remove_sequences(self.dicom)
-
         # Remove private tags at the onset, if requested
-        if remove_private:
-            self.remove_private()
+        if remove_private=="remove" or remove_private=="keep_only_specified":
+            self.remove_private(remove_private)
 
         # In the parsing, we generate a list of DicomField objects.
         fields = self.get_fields(expand_sequences=True)
@@ -599,17 +598,46 @@ class DicomParser:
             if do_removal is True and field.name not in self.excluded_from_deletion:
                 self.delete_field(field)
 
-    def remove_private(self):
+    def remove_private(self, remove_private):
         """
-        Remove private tags from the loaded dicom
+        Remove private tags from the loaded dicom.
+        If remove_private is "keep_only_specified", keep those explicitly listed in 
+        the recipe (by tag and private creator) and remove all the others.
+        Otherwise, remove all private tags.
         """
-        try:
-            self.dicom.remove_private_tags()
-        except Exception:
-            bot.error(
-                """Private tags for %s could not be completely removed, usually
-                         this is due to invalid data type. Removing others."""
-                % self.dicom_name
-            )
+        if remove_private == "keep_only_specified":
+            # Collect all KEEP actions for private tags from the recipe
+            keep_fields = set()
+            for action in self.recipe.get_actions():
+                field = action.get("field")
+                if field and re.match(r"\([0-9A-Fa-f]{4},\".+\",[0-9A-Fa-f]{2}\)", field):
+                    keep_fields.add(field)
+            print(f"Keeping private tags: {keep_fields}")
+            removed = 0
             for ptag in get_private(self.dicom):
-                del self.dicom[ptag.tag]
+                group = f"{ptag.tag.group:04X}"
+                element = f"{ptag.tag.element:02X}"
+                creator = None
+                if hasattr(ptag, "private_creator") and ptag.private_creator:
+                    creator = ptag.private_creator
+                if creator:
+                    tag_str = f'({group},"{creator}",{element[-2:]})'
+                    # Compare in lower case for both sides
+                    if tag_str.lower() in {k.lower() for k in keep_fields}:
+                        continue
+                try:
+                    del self.dicom[ptag.tag]
+                    removed += 1
+                except Exception:
+                    pass
+            if removed:
+                bot.info(f"Removed {removed} private tags not listed in recipe.")
+        else:
+            try:
+                self.dicom.remove_private_tags()
+            except Exception:
+                bot.error(
+                    f"Private tags for {self.dicom_name} could not be completely removed, usually this is due to invalid data type. Removing others."
+                )
+                for ptag in get_private(self.dicom):
+                    del self.dicom[ptag.tag]

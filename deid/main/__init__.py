@@ -159,6 +159,16 @@ def get_parser():
         required=True,
     )
 
+    # Remove private tags
+    ids.add_argument(
+        "--remove_private_tags",
+        "-r",
+        dest="remove_private_tags",
+        help="specify to keep, remove or keep private tags specified in the deid recipe from DICOM headers.",
+        choices=["keep", "remove", "keep_only_specified"],
+        default="remove",
+    )
+
     return parser
 
 

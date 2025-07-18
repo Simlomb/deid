@@ -58,9 +58,10 @@ def main(args, parser):
         ids = args.ids
 
     # GET identifiers
+    remove_private = args.remove_private_tags
 
     if do_get is True:
-        ids = get_identifiers(dicom_files)
+        ids = get_identifiers(dicom_files, remove_private=remove_private)
 
     if do_put is True:
         cleaned_files = replace_identifiers(
@@ -70,6 +71,7 @@ def main(args, parser):
             overwrite=args.overwrite,
             output_folder=output_folder,
             save=True,
+            remove_private=remove_private
         )
 
         bot.info("%s %s files at %s" % (len(cleaned_files), args.format, output_folder))

@@ -18,7 +18,7 @@ def get_identifiers(
     force=True,
     config=None,
     strip_sequences=False,
-    remove_private=False,
+    remove_private="remove",
     disable_skip=False,
     expand_sequences=True,
 ):
@@ -94,7 +94,7 @@ def replace_identifiers(
     force=True,
     config=None,
     strip_sequences=False,
-    remove_private=False,
+    remove_private="remove",
     disable_skip=False,
 ):
     """
