@@ -1092,6 +1092,7 @@ class TestRuleInteractions(unittest.TestCase):
             strip_sequences=False,
         )
 
+        
         outputfile = utils.dcmread(result[0])
         self.assertEqual(1, len(result))
         self.assertEqual(valueexpected, outputfile[field].value)
@@ -1105,16 +1106,8 @@ class TestRuleInteractions(unittest.TestCase):
         print("Test KEEP/REMOVE standard tags Interaction loaded from recipe at deid/data/deid.dicom.test")
         dicom_file = get_file(self.dataset)
 
-        field = '0x00100010'
-
-        action1 = "KEEP"
-        action2 = "REMOVE"
-
-        actions = [
-            {"action": action1, "field": field},
-            {"action": action2, "field": field},
-        ]
-
+        field = '00100010'
+        
         inputfile = utils.dcmread(dicom_file)
         currentValue = inputfile[field].value
         valueexpected = currentValue
