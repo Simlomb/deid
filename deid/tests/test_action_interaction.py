@@ -1170,6 +1170,7 @@ class TestRuleInteractions(unittest.TestCase):
             strip_sequences=False,
         )
 
+        
         outputfile = utils.dcmread(result[0])
         self.assertEqual(1, len(result))
         self.assertEqual(valueexpected, outputfile[field].value)
@@ -1183,6 +1184,7 @@ class TestRuleInteractions(unittest.TestCase):
         print("Test KEEP/REMOVE Interaction for private creator syntax")
         dicom_file = get_file(self.dataset)
 
+<<<<<<< HEAD
         field = '(0033,"MITRA OBJECT UTF8 ATTRIBUTES 1.0",1E)'
         field_dicom = "0033101E"
 
@@ -1195,6 +1197,10 @@ class TestRuleInteractions(unittest.TestCase):
         ]
         recipe = create_recipe(actions)
 
+=======
+        field = '00100010'
+        
+>>>>>>> d5d4100 (test: clean test_keep_remove_standard_tags_from_configfile_should_be_original_value)
         inputfile = utils.dcmread(dicom_file)
         currentValue = inputfile[field_dicom].value
         valueexpected = currentValue
