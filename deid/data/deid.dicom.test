@@ -1,0 +1,6 @@
+FORMAT dicom
+
+%header
+
+KEEP 00100010
+REMOVE 00100010
