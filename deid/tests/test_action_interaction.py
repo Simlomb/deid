@@ -1076,11 +1076,16 @@ class TestRuleInteractions(unittest.TestCase):
             {"action": action2, "field": field},
         ]
         recipe = create_recipe(actions)
-
+        import re
         inputfile = utils.dcmread(dicom_file)
-        currentValue = inputfile[field].value
-        valueexpected = currentValue
-
+        for elem in inputfile.iterall():
+            if elem.tag.is_private and elem.name == 'Private Creator' and elem.value == 'MITRA OBJECT UTF8 ATTRIBUTES 1.0':
+                full_creator_tag = re.sub('([(]|[)]|,| )', '', str(elem.tag))
+                creator_tag = full_creator_tag[-2:]
+        field_dicom = '0x0033'+creator_tag+'1E'
+        currentValue = inputfile[field_dicom].value
+        valueexpected = currentValue       
+                
         self.assertNotEqual(None, currentValue)
         self.assertNotEqual("", currentValue)
 
@@ -1094,7 +1099,7 @@ class TestRuleInteractions(unittest.TestCase):
 
         outputfile = utils.dcmread(result[0])
         self.assertEqual(1, len(result))
-        self.assertEqual(valueexpected, outputfile[field].value)
+        self.assertEqual(valueexpected, outputfile[field_dicom].value)
 
     def test_keep_remove_single_standard_tag_should_be_original_value_2(self):
         """RECIPE RULE
