@@ -25,7 +25,7 @@ class TestRemoveAction(unittest.TestCase):
         shutil.rmtree(self.tmpdir)
         print("\n######################END########################")
 
-    def run_remove_test(self, Field):
+    def run_remove_single_tag_fieldtest(self, Field):
         print(f"Test REMOVE standard tags in format {Field}")
         dicom_file = get_file(self.dataset)
 
@@ -35,7 +35,7 @@ class TestRemoveAction(unittest.TestCase):
         recipe = create_recipe(actions)
 
         inputfile = utils.dcmread(dicom_file)
-        currentValue = inputfile[Field].value
+        currentValue = inputfile['00100010'].value
 
         self.assertNotEqual(None, currentValue)
         self.assertNotEqual("", currentValue)
@@ -50,26 +50,27 @@ class TestRemoveAction(unittest.TestCase):
 
         outputfile = utils.dcmread(result[0])
         self.assertEqual(1, len(result))
-        self.assertNotIn(Field, outputfile)
+        with self.assertRaises(KeyError):
+            _ = outputfile['00100010'].value
 
     def test_remove_standard_tags_1(self):
-        self.run_remove_test("(0010,0010)")  # PatientName in DICOM format
+        self.run_remove_single_tag_fieldtest("(0010,0010)")  # PatientName in DICOM format
 
     def test_remove_standard_tags_2(self):
-        self.run_remove_test("00100010")  # PatientName in hex format
+        self.run_remove_single_tag_fieldtest("00100010")  # PatientName in hex format
 
     def test_remove_standard_tags_3(self):
-        self.run_remove_test("PatientName")  # PatientName in keyword format
+        self.run_remove_single_tag_fieldtest("PatientName")  # PatientName in keyword format
 
-    def test_remove_private_tags_test(self):
+    def test_remove_single_private_tag_field(self):
         """RECIPE RULE
         REMOVE (0033,"MITRA OBJECT UTF8 ATTRIBUTES 1.0",1E)
         """
         print(f"Test REMOVE private tag in format (0033,'MITRA OBJECT UTF8 ATTRIBUTES 1.0', 1E)")
         dicom_file = get_file(self.dataset)
 
-        Field = "(0033,'MITRA OBJECT UTF8 ATTRIBUTES 1.0',1E)"
-        field_dicom = '0x0033101E'
+        Field = '(0033,"MITRA OBJECT UTF8 ATTRIBUTES 1.0",1E)'
+        field_dicom = '0033101E'
         actions = [
             {"action": "REMOVE", "field": Field},
         ]
@@ -91,7 +92,9 @@ class TestRemoveAction(unittest.TestCase):
         outputfile = utils.dcmread(result[0])
 
         self.assertEqual(1, len(result))
-        self.assertNotIn('(0033,101E)', outputfile)
+        with self.assertRaises(KeyError):
+            _ = outputfile[field_dicom].value
+
 
 if __name__ == "__main__":
     unittest.main()
