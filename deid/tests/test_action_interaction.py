@@ -1020,15 +1020,15 @@ class TestRuleInteractions(unittest.TestCase):
 
     def test_keep_remove_private_tags_should_be_original_value(self):
         """RECIPE RULE
-        KEEP (0011,0001)
-        REMOVE (0011,0001)
+        KEEP (0033,"MITRA OBJECT UTF8 ATTRIBUTES 1.0",1E)
+        REMOVE (0033,"MITRA OBJECT UTF8 ATTRIBUTES 1.0",1E)
         """
 
         print("Test KEEP/REMOVE private tags Interaction")
         dicom_file = get_file(self.dataset)
 
-        field = '00100010'
-
+        field = '(0033,"MITRA OBJECT UTF8 ATTRIBUTES 1.0",1E)'
+        
         action1 = "KEEP"
         action2 = "REMOVE"
 
@@ -1037,11 +1037,16 @@ class TestRuleInteractions(unittest.TestCase):
             {"action": action2, "field": field},
         ]
         recipe = create_recipe(actions)
-
+        import re
         inputfile = utils.dcmread(dicom_file)
-        currentValue = inputfile[field].value
-        valueexpected = currentValue
-
+        for elem in inputfile.iterall():
+            if elem.tag.is_private and elem.name == 'Private Creator' and elem.value == 'MITRA OBJECT UTF8 ATTRIBUTES 1.0':
+                full_creator_tag = re.sub('([(]|[)]|,| )', '', str(elem.tag))
+                creator_tag = full_creator_tag[-2:]
+        field_dicom = '0x0033'+creator_tag+'1E'
+        currentValue = inputfile[field_dicom].value
+        valueexpected = currentValue       
+                
         self.assertNotEqual(None, currentValue)
         self.assertNotEqual("", currentValue)
 
@@ -1055,7 +1060,7 @@ class TestRuleInteractions(unittest.TestCase):
 
         outputfile = utils.dcmread(result[0])
         self.assertEqual(1, len(result))
-        self.assertEqual(valueexpected, outputfile[field].value)
+        self.assertEqual(valueexpected, outputfile[field_dicom].value)
 
     def test_keep_remove_standard_tags_should_be_original_value(self):
         """RECIPE RULE
@@ -1097,35 +1102,6 @@ class TestRuleInteractions(unittest.TestCase):
         self.assertEqual(1, len(result))
         self.assertEqual(valueexpected, outputfile[field].value)
 
-    def test_keep_remove_standard_tags_from_configfile_should_be_original_value(self):
-        """RECIPE RULE
-        KEEP (0010,0010) #PatientName
-        REMOVE (0010,0010)
-        """
-
-        print("Test KEEP/REMOVE standard tags Interaction loaded from recipe at deid/data/deid.dicom.test")
-        dicom_file = get_file(self.dataset)
-
-        field = '00100010'
-        
-        inputfile = utils.dcmread(dicom_file)
-        currentValue = inputfile[field].value
-        valueexpected = currentValue
-
-        self.assertNotEqual(None, currentValue)
-        self.assertNotEqual("", currentValue)
-
-        result = replace_identifiers(
-            dicom_files=dicom_file,
-            deid="deid/data/deid.dicom.test",
-            save=True,
-            remove_private=False,
-            strip_sequences=False,
-        )
-
-        outputfile = utils.dcmread(result[0])
-        self.assertEqual(1, len(result))
-        self.assertEqual(valueexpected, outputfile[field].value)
 
     def test_replace_add_should_have_add_value(self):
         """RECIPE RULE

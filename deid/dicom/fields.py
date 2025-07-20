@@ -74,8 +74,8 @@ class DicomField:
             stripped_private_tag = f'{self.element.tag.group:04X},"{self.element.private_creator}",{(self.element.tag.element&0xFF):02X}' 
             private_tag = "(" + stripped_private_tag + ")"
             if (
-                re.search(expression, stripped_private_tag)
-                or re.search(expression, private_tag)
+                re.search(expression, stripped_private_tag, re.IGNORECASE)
+                or re.search(expression, private_tag, re.IGNORECASE)
             ):
                 return True
 

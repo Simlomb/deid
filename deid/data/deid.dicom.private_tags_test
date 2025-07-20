@@ -1,0 +1,5 @@
+FORMAT dicom
+
+%header
+
+REMOVE (0019,"GEMS_ACQU_01",0f)
