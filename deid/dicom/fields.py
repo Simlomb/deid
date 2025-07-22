@@ -243,7 +243,8 @@ def expand_field_expression(field, dicom, contenders=None):
     # Case 2: The field is a specific field OR an expander with argument (A:B)
     fields = field.split(":", 1)
     if len(fields) == 1:
-        return {
+        for uid, field in contenders.items():
+            return {
             uid: field
             for uid, field in contenders.items()
             if field.name_contains(fields[0], whole_string=True)
@@ -287,7 +288,6 @@ def get_fields(dicom, skip=None, expand_sequences=True, seen=None):
     skip = skip or []
     seen = seen or []
     fields = {}  # indexed by nested tag
-
     if not isinstance(skip, list):
         skip = [skip]
 
@@ -314,11 +314,11 @@ def get_fields(dicom, skip=None, expand_sequences=True, seen=None):
         dataset.prefix = getattr(dataset, "prefix", None)
         dataset.uid = getattr(dataset, "uid", None)
         is_filemeta = isinstance(dataset, FileMetaDataset)
-
         # Includes private tags, sequences flattened, non-null values
         for contender in dataset:
             # All items should be data elements, skip based on keyword or tag
-            if contender.keyword in skip or str(contender.tag) in skip:
+            temp_field = DicomField(contender, contender.keyword, str(contender.tag), is_filemeta)
+            if any(temp_field.name_contains(f"^{str(s)}$") for s in skip):
                 continue
 
             # The name represents nesting

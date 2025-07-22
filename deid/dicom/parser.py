@@ -223,7 +223,6 @@ class DicomParser:
 
         # In the parsing, we generate a list of DicomField objects.
         fields = self.get_fields(expand_sequences=True)
-
         # if we loaded a deid recipe
         if self.recipe.deid is not None:
             # Prepare additional lists of values and lookup fields (index by nested uid)
@@ -238,7 +237,6 @@ class DicomParser:
                     self.lookup[group] = extract_fields_list(
                         dicom=self.dicom, actions=actions, fields=fields
                     )
-
             # actions on the header
             for action in self.recipe.get_actions():
                 self.perform_action(
@@ -323,6 +321,7 @@ class DicomParser:
         a DicomField. If we find a sequence, we unwrap it and
         represent the location with the name (e.g., Sequence__Child)
         """
+        #print('sono in get_fields esterno:  ', self.fields)
         if not self.fields:
             self.fields = get_fields(
                 dicom=self.dicom,
@@ -401,7 +400,7 @@ class DicomParser:
         if re.search("^values", field):
             values = self.lookup.get(re.sub("^values:", "", field), [])
             fields = self.find_by_values(values=values)
-
+            
         # A fields list is used verbatim
         # In expand_field_expression below, the stripped_tag is being passed in to field.  At this point,
         # expanders for %fields lists have already been processed and each of the contenders is an
@@ -426,7 +425,6 @@ class DicomParser:
             fields = expand_field_expression(
                 field=field, dicom=self.dicom, contenders=self.fields
             )
-
         # If it's an addition, we might not have fields
         if action == "ADD":
             self.add_field(field, value)
@@ -589,6 +587,7 @@ class DicomParser:
         elif action == "REMOVE":
             # If a value is defined, parse it (could be filter)
             do_removal = True
+            print('we are in removal')
             if value is not None:
                 do_removal = parse_value(
                     item=self.lookup,
