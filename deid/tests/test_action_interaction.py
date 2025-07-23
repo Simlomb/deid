@@ -1019,6 +1019,48 @@ class TestRuleInteractions(unittest.TestCase):
         self.assertEqual(valueexpected, outputfile[field].value)
 
     def test_keep_remove_should_be_original_value_2(self):
+<<<<<<< HEAD
+=======
+        """RECIPE RULE
+        KEEP startswith:Manu
+        REMOVE startswith:Manu
+        """
+
+        print("Test KEEP/REMOVE Interaction")
+        dicom_file = get_file(self.dataset)
+
+        field = "startswith:Manu"
+
+        action1 = "KEEP"
+        action2 = "REMOVE"
+
+        actions = [
+            {"action": action1, "field": field},
+            {"action": action2, "field": field},
+        ]
+        recipe = create_recipe(actions)
+
+        inputfile = utils.dcmread(dicom_file)
+        currentValue = inputfile["Manufacturer"].value
+        valueexpected = currentValue
+
+        self.assertNotEqual(None, currentValue)
+        self.assertNotEqual("", currentValue)
+
+        result = replace_identifiers(
+            dicom_files=dicom_file,
+            deid=recipe,
+            save=True,
+            remove_private=False,
+            strip_sequences=False,
+        )
+
+        outputfile = utils.dcmread(result[0])
+        self.assertEqual(1, len(result))
+        self.assertEqual(valueexpected, outputfile["Manufacturer"].value)
+
+    def test_keep_remove_private_tags_should_be_original_value(self):
+>>>>>>> 54740bb (bug: Fix tag specification for KEEP action so that it accepts the same field specifications as all the other actions, which can contain tag name, keyword, stripped tag, expanders, or parentheses-enclosed comma-separated tag)
         """RECIPE RULE
         KEEP startswith:Manu
         REMOVE startswith:Manu
@@ -1101,6 +1143,56 @@ class TestRuleInteractions(unittest.TestCase):
         self.assertEqual(1, len(result))
         self.assertEqual(valueexpected, outputfile[field_dicom].value)
 
+<<<<<<< HEAD
+    def test_keep_remove_single_standard_tag_should_be_original_value_2(self):
+        """RECIPE RULE
+        KEEP (0010,0010)
+        REMOVE (0010,0010)
+=======
+
+
+    def test_keep_remove_single_standard_tag_should_be_original_value_1(self):
+        """RECIPE RULE
+        KEEP 00100010
+        REMOVE 00100010
+>>>>>>> 54740bb (bug: Fix tag specification for KEEP action so that it accepts the same field specifications as all the other actions, which can contain tag name, keyword, stripped tag, expanders, or parentheses-enclosed comma-separated tag)
+        """
+
+        print("Test KEEP/REMOVE Interaction")
+        dicom_file = get_file(self.dataset)
+
+<<<<<<< HEAD
+=======
+        field = "00100010"
+
+        action1 = "KEEP"
+        action2 = "REMOVE"
+
+        actions = [
+            {"action": action1, "field": field},
+            {"action": action2, "field": field},
+        ]
+        recipe = create_recipe(actions)
+
+        inputfile = utils.dcmread(dicom_file)
+        currentValue = inputfile[field].value
+        valueexpected = currentValue
+
+        self.assertNotEqual(None, currentValue)
+        self.assertNotEqual("", currentValue)
+
+        result = replace_identifiers(
+            dicom_files=dicom_file,
+            deid=recipe,
+            save=True,
+            remove_private=False,
+            strip_sequences=False,
+        )
+
+        outputfile = utils.dcmread(result[0])
+        self.assertEqual(1, len(result))
+        self.assertEqual(valueexpected, outputfile[field].value)
+
     def test_keep_remove_single_standard_tag_should_be_original_value_2(self):
         """RECIPE RULE
         KEEP (0010,0010)
@@ -1110,6 +1202,7 @@ class TestRuleInteractions(unittest.TestCase):
         print("Test KEEP/REMOVE Interaction")
         dicom_file = get_file(self.dataset)
 
+>>>>>>> 54740bb (bug: Fix tag specification for KEEP action so that it accepts the same field specifications as all the other actions, which can contain tag name, keyword, stripped tag, expanders, or parentheses-enclosed comma-separated tag)
         field = "(0010,0010)"
 
         action1 = "KEEP"
@@ -1140,13 +1233,22 @@ class TestRuleInteractions(unittest.TestCase):
         self.assertEqual(1, len(result))
         self.assertEqual(valueexpected, outputfile["00100010"].value)
 
+<<<<<<< HEAD
     def test_keep_remove_single_private_tag_should_be_original_value_1(self):
+=======
+
+    def test_keep_remove_single_private_tag_should_be_original_value(self):
+>>>>>>> 54740bb (bug: Fix tag specification for KEEP action so that it accepts the same field specifications as all the other actions, which can contain tag name, keyword, stripped tag, expanders, or parentheses-enclosed comma-separated tag)
         """RECIPE RULE
         KEEP 0033101E
         REMOVE 0033101E
         """
 
+<<<<<<< HEAD
         print("Test KEEP/REMOVE Interaction private tag")
+=======
+        print("Test KEEP/REMOVE Interaction")
+>>>>>>> 54740bb (bug: Fix tag specification for KEEP action so that it accepts the same field specifications as all the other actions, which can contain tag name, keyword, stripped tag, expanders, or parentheses-enclosed comma-separated tag)
         dicom_file = get_file(self.dataset)
 
         field = "0033101E"
@@ -1175,7 +1277,6 @@ class TestRuleInteractions(unittest.TestCase):
             strip_sequences=False,
         )
 
-        
         outputfile = utils.dcmread(result[0])
         self.assertEqual(1, len(result))
         self.assertEqual(valueexpected, outputfile[field].value)

@@ -314,11 +314,11 @@ def get_fields(dicom, skip=None, expand_sequences=True, seen=None):
         dataset.prefix = getattr(dataset, "prefix", None)
         dataset.uid = getattr(dataset, "uid", None)
         is_filemeta = isinstance(dataset, FileMetaDataset)
+
         # Includes private tags, sequences flattened, non-null values
         for contender in dataset:
             # All items should be data elements, skip based on keyword or tag
-            temp_field = DicomField(contender, contender.keyword, str(contender.tag), is_filemeta)
-            if any(temp_field.name_contains(f"^{str(s)}$") for s in skip):
+            if contender.keyword in skip or str(contender.tag) in skip:
                 continue
 
             # The name represents nesting

@@ -587,7 +587,6 @@ class DicomParser:
         elif action == "REMOVE":
             # If a value is defined, parse it (could be filter)
             do_removal = True
-            print('we are in removal')
             if value is not None:
                 do_removal = parse_value(
                     item=self.lookup,
