@@ -169,6 +169,40 @@ class TestRemoveAction(unittest.TestCase):
         with self.assertRaises(KeyError):
             _ = outputfile[field_dicom].value
 
+    def test_remove_single_tag_private_creator_syntax_3(self):
+        """RECIPE RULE
+        REMOVE (0033,"MITRA OBJECT UTF8 ATTRIBUTES 1.0",1E)
+        """
+        print(
+            "Test REMOVE private tag with private creator syntax from external recipe file"
+        )
+        dicom_file = get_file(self.dataset)
+
+        field_dicom = "0033101E"
+
+        recipe = os.path.abspath(
+            "%s/../examples/deid/deid.dicom-private-creator-syntax" % self.pwd
+        )
+
+        inputfile = utils.dcmread(dicom_file)
+        currentValue = inputfile[field_dicom].value
+
+        self.assertNotEqual(None, currentValue)
+        self.assertNotEqual("", currentValue)
+
+        result = replace_identifiers(
+            dicom_files=dicom_file,
+            deid=recipe,
+            save=True,
+            remove_private=False,
+            strip_sequences=False,
+        )
+        outputfile = utils.dcmread(result[0])
+
+        self.assertEqual(1, len(result))
+        with self.assertRaises(KeyError):
+            _ = outputfile[field_dicom].value
+
     def test_remove_single_tag_private_creator_no_match(self):
         """RECIPE RULE
         REMOVE 0033,"MITRA OBJECT UTF8 ATTRIBUTES 1",1E
