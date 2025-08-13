@@ -245,10 +245,10 @@ def expand_field_expression(field, dicom, contenders=None):
     if len(fields) == 1:
         for uid, field in contenders.items():
             return {
-            uid: field
-            for uid, field in contenders.items()
-            if field.name_contains(fields[0], whole_string=True)
-        }
+                uid: field
+                for uid, field in contenders.items()
+                if field.name_contains(fields[0], whole_string=True)
+            }
 
     # if we get down here, we have an expander and expression
     expander, expression = fields

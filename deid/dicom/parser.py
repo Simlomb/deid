@@ -321,7 +321,6 @@ class DicomParser:
         a DicomField. If we find a sequence, we unwrap it and
         represent the location with the name (e.g., Sequence__Child)
         """
-        #print('sono in get_fields esterno:  ', self.fields)
         if not self.fields:
             self.fields = get_fields(
                 dicom=self.dicom,
@@ -400,7 +399,7 @@ class DicomParser:
         if re.search("^values", field):
             values = self.lookup.get(re.sub("^values:", "", field), [])
             fields = self.find_by_values(values=values)
-            
+
         # A fields list is used verbatim
         # In expand_field_expression below, the stripped_tag is being passed in to field.  At this point,
         # expanders for %fields lists have already been processed and each of the contenders is an
@@ -596,7 +595,32 @@ class DicomParser:
                     funcs=self.deid_funcs,
                 )
 
-            if do_removal is True and field.name not in self.excluded_from_deletion:
+            # Check if field should be excluded from deletion to maintain action priority
+            # This ensures that fields marked for REPLACE or JITTER actions are not
+            # removed before they can be processed, maintaining the correct action hierarchy:
+            # KEEP > ADD > REPLACE > JITTER > REMOVE > BLANK
+            is_excluded = False
+            if do_removal is True:
+                for excluded_field in self.excluded_from_deletion:
+                    # Use expand_field_expression to properly match field identifiers
+                    # This resolves the format mismatch issue where excluded_from_deletion
+                    # contains recipe format identifiers (e.g., "(0008,0020)", "StudyDate")
+                    # but field.uid is in internal format. expand_field_expression normalizes
+                    # all field identifier formats for proper comparison.
+                    excluded_fields = expand_field_expression(
+                        field=excluded_field, dicom=self.dicom, contenders=self.fields
+                    )
+                    # Check if the current field's UID matches any of the expanded
+                    # excluded fields. This ensures format-agnostic matching regardless
+                    # of how the field was specified in the deid recipe.
+                    if field.uid in excluded_fields:
+                        is_excluded = True
+                        break
+
+            # Only proceed with removal if both conditions are met:
+            # 1. do_removal is True (field passes any filter conditions)
+            # 2. is_excluded is False (field is not marked for later REPLACE/JITTER)
+            if do_removal is True and not is_excluded:
                 self.delete_field(field)
 
     def remove_private(self):
